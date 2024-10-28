@@ -191,6 +191,16 @@ class LensAPI:
         else:
             raise ValueError("Invalid response method")
 
+def format_ocr_result(result):
+    formatted_result = {
+        "language": result.get("language", ""),
+        "text_with_coordinates": [
+            f"{item['text']}: {item['coordinates']}"
+            for item in result.get("text_with_coordinates", [])
+        ]
+    }
+    return json5.dumps(formatted_result, indent=4, ensure_ascii=False)
+
 @register_OCR('google_lens')
 class OCRLensAPI(OCRBase):
     params = {
@@ -254,15 +264,15 @@ class OCRLensAPI(OCRBase):
     def _ocr_blk_list(self, img: np.ndarray, blk_list: List[TextBlock], *args, **kwargs):
         im_h, im_w = img.shape[:2]
         if self.debug_mode:
-            self.logger.info(f'Image size: {im_h}x{im_w}')
+            self.logger.debug(f'Image size: {im_h}x{im_w}')
         for blk in blk_list:
             x1, y1, x2, y2 = blk.xyxy
             if self.debug_mode:
-                self.logger.info(f'Processing block: ({x1, y1, x2, y2})')
+                self.logger.debug(f'Processing block: ({x1, y1, x2, y2})')
             if y2 < im_h and x2 < im_w and x1 > 0 and y1 > 0 and x1 < x2 and y1 < y2:
                 cropped_img = img[y1:y2, x1:x2]
                 if self.debug_mode:
-                    self.logger.info(f'Cropped image size: {cropped_img.shape}')
+                    self.logger.debug(f'Cropped image size: {cropped_img.shape}')
                 blk.text = self.ocr(cropped_img)
             else:
                 if self.debug_mode:
@@ -273,19 +283,20 @@ class OCRLensAPI(OCRBase):
         if self.debug_mode:
             self.logger.debug(f'ocr_img: {img.shape}')
         return self.ocr(img)
-
+    
     def ocr(self, img: np.ndarray) -> str:
         if self.debug_mode:
-            self.logger.info(f'Starting OCR on image of shape: {img.shape}')
+            self.logger.debug(f'Starting OCR on image of shape: {img.shape}')
         self._respect_delay()
         try:
             if img.size > 0:  # Check if the image is not empty
                 if self.debug_mode:
-                    self.logger.info(f'Input image size: {img.shape}')
+                    self.logger.debug(f'Input image size: {img.shape}')
                 _, buffer = cv2.imencode('.jpg', img)
                 result = self.api.process_image(image_buffer=buffer.tobytes(), response_method=self.response_method)
                 if self.debug_mode:
-                    self.logger.info(f'OCR result: {result}')
+                    formatted_result = format_ocr_result(result)
+                    self.logger.debug(f'OCR result: {formatted_result}')
                 ignore_texts = [
                     'Full text not found in expected structure',
                     'Full text not found (or Lens could not recognize it)'
@@ -349,6 +360,6 @@ class OCRLensAPI(OCRBase):
     def updateParam(self, param_key: str, param_content):
         super().updateParam(param_key, param_content)
         if param_key == 'proxy':
-            # При изменении прокси пересоздаем клиента
-            self.api.lens.proxy = self.proxy  # Обновляем прокси
-            self.api.lens.client = None  # Обнуляем клиента, чтобы создать его при следующем запросе
+            # When changing the proxy, we recreate the client
+            self.api.lens.proxy = self.proxy # Updating the proxy
+            self.api.lens.client = None # Zeroing the client to create it at the next request

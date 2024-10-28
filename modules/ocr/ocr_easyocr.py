@@ -277,7 +277,7 @@ class EasyOCRModule(OCRBase):
         if param_key in ['language', 'device', 'enable_detection']:
             self.language = self.params['language']['value']
             self.device = self.params['device']['value']
-            self.enable_detection = self.params['enable_detection']['value'] == 'Включить детектирование'
+            self.enable_detection = self.params['enable_detection']['value'] == 'Enable detection'
             self._load_model()
         elif param_key == 'to_uppercase':
             self.to_uppercase = self.params['to_uppercase']['value']

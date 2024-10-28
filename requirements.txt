@@ -45,6 +45,9 @@ multivolumefile
 httpx[socks,brotli]
 langdetect
 translators
+easyocr
+paddleocr
+paddlepaddle-gpu
 json5
 httpx-socks
 pywin32; sys_platform == 'win32'

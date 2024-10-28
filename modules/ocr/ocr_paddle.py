@@ -208,13 +208,12 @@ class PaddleOCRModule(OCRBase):
                 cropped_img = img[y1:y2, x1:x2]
                 if self.debug_mode:
                     self.logger.debug(f"Processing a block with coordinates: ({x1}, {y1}, {x2}, {y2})")
+                    # Log the text from each block
+                    self.logger.debug(f"Text from the block ({x1}, {y1}, {x2}, {y2}): {text}")
                 try:
                     result = self.model.ocr(cropped_img, det=True, rec=True, cls=self.use_angle_cls)
                     text = self._process_result(result)
                     blk.text = text if text else ''
-                    
-                    # Log the text from each block
-                    self.logger.debug(f"Text from the block ({x1}, {y1}, {x2}, {y2}): {text}")
                     
                 except Exception as e:
                     if self.debug_mode:

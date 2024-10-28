@@ -102,7 +102,7 @@ class EasyOCRModule(OCRBase):
         'language': {
             'type': 'selector',
             'options': list(lang_map.keys()),
-            'value': 'English',  # Язык по умолчанию
+            'value': 'English',  # Default language
         },
         'device': DEVICE_SELECTOR(),
         'enable_detection': {
@@ -180,7 +180,7 @@ class EasyOCRModule(OCRBase):
         if self.debug_mode:
             self.logger.debug(f"Начало OCR для изображения размером: {img.shape}")
         if self.enable_detection:
-            # Используем readtext с оригинальным изображением
+            # Use readtext with original image
             result = self.reader.readtext(
                 image=img,
                 detail=self.detail,
@@ -191,12 +191,12 @@ class EasyOCRModule(OCRBase):
                 adjust_contrast=self.adjust_contrast
             )
         else:
-            # Конвертируем изображение в оттенки серого
+            # Convert the image to grayscale
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            # Предобработка изображения (опционально)
+            # Image preprocessing (optional)
             _, img_gray = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
             h, w = img_gray.shape
-            # Создаем bounding box в формате четырех точек
+            # Create a bounding box in four-point format
             bbox = np.array([[0, 0], [w, 0], [w, h], [0, h]])
             result = self.reader.recognize(
                 img_cv_grey=img_gray,
@@ -223,7 +223,7 @@ class EasyOCRModule(OCRBase):
                 if self.debug_mode:
                     self.logger.debug(f"Обработка блока с координатами: ({x1}, {y1}, {x2}, {y2})")
                 if self.enable_detection:
-                    # Используем readtext с обрезанным изображением
+                    # Use readtext with cropped image
                     result = self.reader.readtext(
                         image=cropped_img,
                         detail=self.detail,
@@ -234,12 +234,12 @@ class EasyOCRModule(OCRBase):
                         adjust_contrast=self.adjust_contrast
                     )
                 else:
-                    # Конвертируем изображение в оттенки серого
+                    # Convert the image to grayscale
                     cropped_img_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-                    # Предобработка изображения (опционально)
+                    # Image preprocessing (optional)
                     _, cropped_img_gray = cv2.threshold(cropped_img_gray, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
                     h, w = cropped_img_gray.shape
-                    # Создаем bounding box в формате четырех точек
+                    # Create a bounding box in four-point format
                     bbox = np.array([[0, 0], [w, 0], [w, h], [0, h]])
                     result = self.reader.recognize(
                         img_cv_grey=cropped_img_gray,
@@ -265,7 +265,7 @@ class EasyOCRModule(OCRBase):
         if self.detail == 0:
             text = ' '.join(result)
         else:
-            # Если detail=1, результат - список с информацией о координатах
+            # If detail=1, the result is a list with coordinate information
             text = ' '.join([item[1] for item in result])
 
         if self.to_uppercase:

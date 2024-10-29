@@ -370,9 +370,9 @@ class OCRLensAPI(OCRBase):
             try:
                 param_content = float(param_content)
             except (ValueError, TypeError):
-                param_content = 1.0  # Значение по умолчанию
+                param_content = 1.0 # Default value
         super().updateParam(param_key, param_content)
         if param_key == 'proxy':
-            # При изменении прокси, пересоздаём клиент
-            self.api.lens.proxy = self.proxy  # Обновляем прокси
-            self.api.lens.client = None  # Обнуляем клиент для создания нового при следующем запросе
+            # When changing the proxy, recreate the client
+            self.api.lens.proxy = self.proxy # Update the proxy
+            self.api.lens.client = None # Reset the client to create a new one on the next request

@@ -238,8 +238,11 @@ class OCRLensAPI(OCRBase):
     
     @property
     def request_delay(self):
-        return self.get_param_value('delay')
-    
+        try:
+            return float(self.get_param_value('delay'))
+        except (ValueError, TypeError):
+            return 1.0 
+
     @property
     def newline_handling(self):
         return self.get_param_value('newline_handling')
@@ -257,6 +260,11 @@ class OCRLensAPI(OCRBase):
         return self.get_param_value('proxy')
 
     def __init__(self, **params) -> None:
+        if 'delay' in params:
+            try:
+                params['delay'] = float(params['delay'])
+            except (ValueError, TypeError):
+                params['delay'] = 1.0  # Значение по умолчанию
         super().__init__(**params)
         self.api = LensAPI(proxy=self.proxy)
         self.last_request_time = 0
@@ -358,8 +366,13 @@ class OCRLensAPI(OCRBase):
         self.last_request_time = time.time()
 
     def updateParam(self, param_key: str, param_content):
+        if param_key == 'delay':
+            try:
+                param_content = float(param_content)
+            except (ValueError, TypeError):
+                param_content = 1.0  # Значение по умолчанию
         super().updateParam(param_key, param_content)
         if param_key == 'proxy':
-            # When changing the proxy, we recreate the client
-            self.api.lens.proxy = self.proxy # Updating the proxy
-            self.api.lens.client = None # Zeroing the client to create it at the next request
+            # При изменении прокси, пересоздаём клиент
+            self.api.lens.proxy = self.proxy  # Обновляем прокси
+            self.api.lens.client = None  # Обнуляем клиент для создания нового при следующем запросе

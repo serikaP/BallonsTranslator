@@ -217,13 +217,26 @@ class PaddleOCRModule(OCRBase):
                 cropped_img = img[y1:y2, x1:x2]
                 try:
                     result = self.model.ocr(cropped_img, det=True, rec=True, cls=self.use_angle_cls)
-                    text = self._process_result(result)
-                    blk.text = text if text else ''
+                    
+                    # Извлечение сырого текста из результата OCR
+                    raw_texts = []
+                    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                        for line in result[0]:
+                            if isinstance(line, list) and len(line) > 1 and isinstance(line[1], (list, tuple)) and len(line[1]) > 0:
+                                raw_texts.append(line[1][0])
+                    raw_text = ' '.join(raw_texts)
                     
                     if self.debug_mode:
-                        self.logger.debug(f"Processing a block with coordinates: ({x1}, {y1}, {x2}, {y2})")
-                        self.logger.debug(f"Text from the block ({x1}, {y1}, {x2}, {y2}): {text}")
-
+                        self.logger.debug(f"Raw OCR text from the block ({x1}, {y1}, {x2}, {y2}): {raw_text}")
+                    
+                    # Обработка результата OCR
+                    text = self._process_result(result)
+                    
+                    if self.debug_mode:
+                        self.logger.debug(f"Processed text from the block ({x1}, {y1}, {x2}, {y2}): {text}")
+                    
+                    blk.text = text if text else ''
+                    
                 except Exception as e:
                     if self.debug_mode:
                         self.logger.error(f"Error recognizing block: {str(e)}")
@@ -277,7 +290,17 @@ class PaddleOCRModule(OCRBase):
             if not texts:
                 return ''
 
-            text = ' '.join(texts)
+            # Обработка формата вывода
+            if self.output_format == 'Single Line':
+                text = ' '.join(texts)
+            elif self.output_format == 'As Recognized':
+                text = '\n'.join(texts)
+            else:
+                text = ' '.join(texts)  # По умолчанию
+
+            if self.debug_mode:
+                self.logger.debug(f"Final processed text: {text}")
+
             return text
         except Exception as e:
             if self.debug_mode:

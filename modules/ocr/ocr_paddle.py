@@ -2,7 +2,16 @@ import numpy as np
 from typing import List
 import os
 import logging
-from paddleocr import PaddleOCR
+
+try:
+    from paddleocr import PaddleOCR
+    PADDLE_OCR_AVAILABLE = True
+except ImportError:
+    PADDLE_OCR_AVAILABLE = False
+    logging.warning(
+        'PaddleOCR is not installed. Install it by following https://www.paddlepaddle.org.cn/en/install/quick?docurl'
+    )
+
 import cv2
 import re
 

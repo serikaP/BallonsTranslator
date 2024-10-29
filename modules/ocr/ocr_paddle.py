@@ -218,7 +218,7 @@ class PaddleOCRModule(OCRBase):
                 try:
                     result = self.model.ocr(cropped_img, det=True, rec=True, cls=self.use_angle_cls)
                     
-                    # Извлечение сырого текста из результата OCR
+                    # Extract raw text from OCR result
                     raw_texts = []
                     if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
                         for line in result[0]:
@@ -229,7 +229,7 @@ class PaddleOCRModule(OCRBase):
                     if self.debug_mode:
                         self.logger.debug(f"Raw OCR text from the block ({x1}, {y1}, {x2}, {y2}): {raw_text}")
                     
-                    # Обработка результата OCR
+                    # Process the OCR result
                     text = self._process_result(result)
                     
                     if self.debug_mode:
@@ -246,6 +246,49 @@ class PaddleOCRModule(OCRBase):
                     self.logger.warning('Invalid text block coordinates for target image')
                 blk.text = ''
 
+    def _process_result(self, result):
+        try:
+            if not result or result[0] is None:
+                return ''
+
+            if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                result = result[0]
+
+            raw_texts = []
+            for line in result:
+                if isinstance(line, list) and len(line) > 1 and isinstance(line[1], (list, tuple)) and len(line[1]) > 0:
+                    text = line[1][0]
+                    raw_texts.append(text)
+
+            # Depending on the output_format, we concatenate the lines
+            if self.output_format == 'Single Line':
+                joined_text = ' '.join(raw_texts)
+                # Text cleaning
+                joined_text = re.sub(r'-(?!\w)', '', joined_text)
+                joined_text = re.sub(r'\s+', ' ', joined_text)
+            elif self.output_format == 'As Recognized':
+                joined_text = ' '.join(raw_texts)  # Combine with spaces to create a single text
+                # Clean up text, preserve line breaks
+                joined_text = re.sub(r'-(?!\w)', '', joined_text)
+                joined_text = re.sub(r'\s+', ' ', joined_text)
+            else:
+                joined_text = ' '.join(raw_texts)
+                joined_text = re.sub(r'-(?!\w)', '', joined_text)
+                joined_text = re.sub(r'\s+', ' ', joined_text)
+
+            # Apply case conversion to all text
+            processed_text = self._apply_text_case(joined_text)
+            processed_text = self._apply_punctuation_and_spacing(processed_text)
+
+            if self.debug_mode:
+                self.logger.debug(f"Final processed text: {processed_text}")
+
+            return processed_text
+        except Exception as e:
+            if self.debug_mode:
+                self.logger.error(f"Error processing OCR result: {str(e)}")
+            return ''
+
     def _apply_text_case(self, text: str) -> str:
         if self.text_case == 'Uppercase':
             return text.upper()
@@ -254,7 +297,7 @@ class PaddleOCRModule(OCRBase):
         elif self.text_case == 'Lowercase':
             return text.lower()
         else:
-            return text  # Без изменений, если режим не распознан
+            return text  # No change if the mode is not recognized
 
     def _capitalize_sentences(self, text: str) -> str:
         def process_sentence(sentence):
@@ -266,47 +309,9 @@ class PaddleOCRModule(OCRBase):
             else:
                 return ' '.join([words[0].capitalize()] + [word.lower() for word in words[1:]])
 
+        # We divide into sentences only by punctuation marks
         sentences = re.split(r'(?<=[.!?…])\s+', text)
         return ' '.join(process_sentence(sentence) for sentence in sentences)
-
-    def _process_result(self, result):
-        try:
-            if not result or result[0] is None:
-                return ''
-
-            if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-                result = result[0]
-
-            texts = []
-            for line in result:
-                if isinstance(line, list) and len(line) > 1 and isinstance(line[1], (list, tuple)) and len(line[1]) > 0:
-                    text = line[1][0]
-                    text = re.sub(r'-(?!\w)', '', text)
-                    text = re.sub(r'\s+', ' ', text)
-                    text = self._apply_text_case(text)  # Применяем выбранный регистр
-                    text = self._apply_punctuation_and_spacing(text)
-                    texts.append(text.strip())
-
-            if not texts:
-                return ''
-
-            # Обработка формата вывода
-            if self.output_format == 'Single Line':
-                text = ' '.join(texts)
-            elif self.output_format == 'As Recognized':
-                text = '\n'.join(texts)
-            else:
-                text = ' '.join(texts)  # По умолчанию
-
-            if self.debug_mode:
-                self.logger.debug(f"Final processed text: {text}")
-
-            return text
-        except Exception as e:
-            if self.debug_mode:
-                self.logger.error(f"Error processing OCR result: {str(e)}")
-            return ''
-
 
     def _apply_punctuation_and_spacing(self, text: str) -> str:
         text = re.sub(r'\s+([,.!?…])', r'\1', text)

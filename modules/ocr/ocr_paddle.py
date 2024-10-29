@@ -233,6 +233,29 @@ class PaddleOCRModule(OCRBase):
                     self.logger.warning('Invalid text block coordinates for target image')
                 blk.text = ''
 
+    def _apply_text_case(self, text: str) -> str:
+        if self.text_case == 'Uppercase':
+            return text.upper()
+        elif self.text_case == 'Capitalize Sentences':
+            return self._capitalize_sentences(text)
+        elif self.text_case == 'Lowercase':
+            return text.lower()
+        else:
+            return text  # Без изменений, если режим не распознан
+
+    def _capitalize_sentences(self, text: str) -> str:
+        def process_sentence(sentence):
+            words = sentence.split()
+            if not words:
+                return ''
+            if len(words) == 1:
+                return words[0].capitalize()
+            else:
+                return ' '.join([words[0].capitalize()] + [word.lower() for word in words[1:]])
+
+        sentences = re.split(r'(?<=[.!?…])\s+', text)
+        return ' '.join(process_sentence(sentence) for sentence in sentences)
+
     def _process_result(self, result):
         try:
             if not result or result[0] is None:
@@ -247,30 +270,20 @@ class PaddleOCRModule(OCRBase):
                     text = line[1][0]
                     text = re.sub(r'-(?!\w)', '', text)
                     text = re.sub(r'\s+', ' ', text)
+                    text = self._apply_text_case(text)  # Применяем выбранный регистр
+                    text = self._apply_punctuation_and_spacing(text)
                     texts.append(text.strip())
 
             if not texts:
                 return ''
 
             text = ' '.join(texts)
-            text = self._apply_no_uppercase(text)
-            text = self._apply_punctuation_and_spacing(text)
-
             return text
         except Exception as e:
             if self.debug_mode:
                 self.logger.error(f"Error processing OCR result: {str(e)}")
             return ''
 
-    def _apply_no_uppercase(self, text: str) -> str:
-        def process_sentence(sentence):
-            words = sentence.split()
-            if not words:
-                return ''
-            return ' '.join([words[0].capitalize()] + [word.lower() for word in words[1:]])
-
-        sentences = re.split(r'(?<=[.!?…])\s+', text)
-        return ' '.join(process_sentence(sentence) for sentence in sentences)
 
     def _apply_punctuation_and_spacing(self, text: str) -> str:
         text = re.sub(r'\s+([,.!?…])', r'\1', text)

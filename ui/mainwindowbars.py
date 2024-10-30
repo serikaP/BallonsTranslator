@@ -181,7 +181,7 @@ class LeftBar(Widget):
         self.runImgtransBtn = QPushButton()
         self.runImgtransBtn.setText('RUN')
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
-        self.run_imgtrans = self.runImgtransBtn.clicked
+        self.run_imgtrans_clicked = self.runImgtransBtn.clicked
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
 
         vlayout = QVBoxLayout(self)

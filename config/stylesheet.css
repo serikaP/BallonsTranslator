@@ -322,8 +322,12 @@ QMenu::item:selected {
 }
 
 QDialog {
-    font-size: 7px;
+    font-size: 14px;
     background-color: @widgetBackgroundColor;
+}
+
+QDialog QPushButton {
+    padding: 5px 15px;
 }
 
 QGroupBox {

@@ -339,7 +339,7 @@ class TitleBar(Widget):
 
         replaceMTkeyword = QAction(self.tr("Keyword substitution for machine translation"), self)
         self.replaceMTkeyword_trigger = replaceMTkeyword.triggered
-        replaceOCRkeyword = QAction(self.tr("Keyword substitution for OCR results"), self)
+        replaceOCRkeyword = QAction(self.tr("Keyword substitution for source text"), self)
         self.replaceOCRkeyword_trigger = replaceOCRkeyword.triggered
 
         editMenu = QMenu(self.editToolBtn)

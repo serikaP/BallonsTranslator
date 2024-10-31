@@ -123,7 +123,7 @@ class MainWindow(mainwindow_cls):
         self.setMinimumWidth(screen_size.width() // 2)
         self.configPanel = ConfigPanel(self)
         self.configPanel.trans_config_panel.show_MT_keyword_window.connect(self.show_MT_keyword_window)
-        self.configPanel.ocr_config_panel.show_OCR_keyword_window.connect(self.show_OCR_keyword_window)
+        self.configPanel.trans_config_panel.show_OCR_keyword_window.connect(self.show_OCR_keyword_window)
 
         self.leftBar = LeftBar(self)
         self.leftBar.showPageListLabel.clicked.connect(self.pageLabelStateChanged)
@@ -198,7 +198,7 @@ class MainWindow(mainwindow_cls):
         self.textPanel.formatpanel.textstyle_panel.export_style.connect(self.export_tstyles)
         self.textPanel.formatpanel.textstyle_panel.import_style.connect(self.import_tstyles)
 
-        self.ocrSubWidget = KeywordSubWidget(self.tr("Keyword substitution for OCR"))
+        self.ocrSubWidget = KeywordSubWidget(self.tr("Keyword substitution for source text"))
         self.ocrSubWidget.setParent(self)
         self.ocrSubWidget.setWindowFlags(Qt.WindowType.Window)
         self.ocrSubWidget.hide()

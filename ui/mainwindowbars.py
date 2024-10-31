@@ -154,6 +154,9 @@ class LeftBar(Widget):
         actionExportTranslationMD = QAction(self.tr("Export translation as markdown"), self)
         self.export_trans_md = actionExportTranslationMD.triggered
 
+        actionImportTranslationTxt = QAction(self.tr("Import translation from TXT/markdown"), self)
+        self.import_trans_txt = actionImportTranslationTxt.triggered
+
         self.recentMenu = QMenu(self.tr("Open Recent"), self)
         
         openMenu = QMenu(self)
@@ -168,6 +171,7 @@ class LeftBar(Widget):
             actionExportTranslationTxt,
             actionExportSrcMD,
             actionExportTranslationMD,
+            actionImportTranslationTxt,
         ])
         self.openBtn = OpenBtn()
         self.openBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
@@ -181,7 +185,7 @@ class LeftBar(Widget):
         self.runImgtransBtn = QPushButton()
         self.runImgtransBtn.setText(self.tr('RUN'))
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
-        self.run_imgtrans = self.runImgtransBtn.clicked
+        self.run_imgtrans_clicked = self.runImgtransBtn.clicked
         self.runImgtransBtn.setFixedSize(LEFTBTN_WIDTH, LEFTBTN_WIDTH)
 
         vlayout = QVBoxLayout(self)

@@ -56,3 +56,6 @@ pyobjc-framework-cocoa; sys_platform == 'darwin'
 pyobjc-framework-coreml; sys_platform == 'darwin'
 pyobjc-framework-quartz; sys_platform == 'darwin'
 pyobjc-framework-vision; sys_platform == 'darwin'
+#paddleocr
+#paddlepaddle - one of these. If you have a CUDA video card, then uncomment paddlepaddle-gpu
+#paddlepaddle-gpu

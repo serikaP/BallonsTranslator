@@ -143,9 +143,11 @@ class TextBlkItem(QGraphicsTextItem):
         doc.setDocumentMargin(self.document().documentMargin())
         doc.setDefaultFont(self.document().defaultFont())
         doc.setHtml(self.document().toHtml())
+        doc.setDefaultTextOption(self.document().defaultTextOption())
         cursor = QTextCursor(doc)
         block = doc.firstBlock()
         stroke_pen = QPen(self.stroke_qcolor, 0, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
+        letter_spacing = self.fontformat.letter_spacing * 100
         while block.isValid():
             it = block.begin()
             while not it.atEnd():
@@ -158,6 +160,9 @@ class TextBlkItem(QGraphicsTextItem):
                 cursor.setPosition(pos1)
                 cursor.setPosition(pos2, QTextCursor.MoveMode.KeepAnchor)
                 cfmt.setTextOutline(stroke_pen)
+                if letter_spacing != 100:
+                    cfmt.setFontLetterSpacingType(QFont.SpacingType.PercentageSpacing)
+                    cfmt.setFontLetterSpacing(letter_spacing)
                 cursor.mergeCharFormat(cfmt)
                 it += 1
             block = block.next()
@@ -165,8 +170,6 @@ class TextBlkItem(QGraphicsTextItem):
         layout = VerticalTextDocumentLayout(doc, self.fontformat) if self.fontformat.vertical \
             else HorizontalTextDocumentLayout(doc, self.fontformat)
         layout._draw_offset = self.layout._draw_offset
-        layout.line_spacing = self.fontformat.line_spacing
-        layout.letter_spacing = self.fontformat.letter_spacing
         layout._is_painting_stroke = True
         layout.setMaxSize(self.layout.max_width, self.layout.max_height, False)
         doc.setDocumentLayout(layout)

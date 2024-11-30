@@ -161,7 +161,7 @@ class TextBlkItem(QGraphicsTextItem):
                 cursor.setPosition(pos1)
                 cursor.setPosition(pos2, QTextCursor.MoveMode.KeepAnchor)
                 cfmt.setTextOutline(stroke_pen)
-                if letter_spacing != 100:
+                if letter_spacing != 100 and not self.fontformat.vertical:
                     cfmt.setFontLetterSpacingType(QFont.SpacingType.PercentageSpacing)
                     cfmt.setFontLetterSpacing(letter_spacing)
                 cursor.mergeCharFormat(cfmt)

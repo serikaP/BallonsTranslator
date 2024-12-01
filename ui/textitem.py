@@ -810,7 +810,7 @@ class TextBlkItem(QGraphicsTextItem):
 
         self.fontformat.stroke_width = stroke_width
         if stroke_width > 0 and padding:
-            p = self.layout.max_font_size(to_px=True) * stroke_width / 2
+            p = self.layout.max_font_size(to_px=True) * (stroke_width + 0.05) / 2
             self.setPadding(p)
 
         self._after_set_ffmt(cursor, repaint_background, restore_cursor, **after_kwargs)
@@ -829,7 +829,8 @@ class TextBlkItem(QGraphicsTextItem):
         if repaint_background:
             fs = pt2px(max(self.layout.max_font_size(), value))
             self.layout.relayout_on_changed = False
-            self.setPadding(fs * self.fontformat.stroke_width / 2)
+            if self.fontformat.stroke_width > 0:
+                self.setPadding(fs * (self.fontformat.stroke_width + 0.05) / 2)
             self.layout.relayout_on_changed = True
         cfmt = QTextCharFormat()
         cfmt.setFontPointSize(value)
